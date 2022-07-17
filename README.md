@@ -4,3 +4,11 @@
   <li> Настроить стенд для выполнения домашнего задания 
   <li> Собрать логи с Web на rsyslog
 </ol>  
+
+# 1. Создать сденд для выполнения домашнего задания
+<ul>
+  <p> Развернута VM на базе Ubuntu ubuntu-20.04.3-live-server-amd64 с названием Ubuntu_Syslog
+  <p> Развернута VM на базе Ubuntu ubuntu-20.04.3-live-server-amd64 с названием Ubuntu_Nginx   
+</ul> 
+
+
