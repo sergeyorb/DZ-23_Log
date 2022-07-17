@@ -1,0 +1,176 @@
+#Переходим в root и устанавливаем время по Москве
+root@ubuntusyslog:~# date
+Sat 16 Jul 2022 05:44:45 PM UTC
+root@ubuntusyslog:~# cp /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+root@ubuntusyslog:~# date
+Sat 16 Jul 2022 08:45:13 PM MSK
+root@ubuntusyslog:~#
+
+#Перезапуск systemd-timesyncd.service 
+#Проверил работу
+root@ubuntusyslog:~# systemctl | grep chro*
+  systemd-timesyncd.service                                                                 loaded active running   Network Time Synchronization
+  time-sync.target                                                                          loaded active active    System Time Synchronized
+root@ubuntusyslog:~# systemctl restart systemd-timesyncd.service
+root@ubuntusyslog:~# systemctl status systemd-timesyncd.service
+● systemd-timesyncd.service - Network Time Synchronization
+     Loaded: loaded (/lib/systemd/system/systemd-timesyncd.service; enabled; vendor preset: enabled)
+     Active: active (running) since Sat 2022-07-16 20:51:20 MSK; 10s ago
+       Docs: man:systemd-timesyncd.service(8)
+   Main PID: 2804 (systemd-timesyn)
+     Status: "Initial synchronization to time server 185.125.190.57:123 (ntp.ubuntu.com)."
+      Tasks: 2 (limit: 2274)
+     Memory: 1.1M
+     CGroup: /system.slice/systemd-timesyncd.service
+             └─2804 /lib/systemd/systemd-timesyncd
+
+Jul 16 20:51:20 ubuntusyslog systemd[1]: Stopped Network Time Synchronization.
+Jul 16 20:51:20 ubuntusyslog systemd[1]: Starting Network Time Synchronization...
+Jul 16 20:51:20 ubuntusyslog systemd[1]: Started Network Time Synchronization.
+Jul 16 20:51:20 ubuntusyslog systemd-timesyncd[2804]: Initial synchronization to time server 185.125.190.57:123 (ntp.ubuntu.com).
+root@ubuntusyslog:~#
+root@ubuntusyslog:~# date
+Sat 16 Jul 2022 08:53:52 PM MSK
+root@ubuntusyslog:~#
+
+#Откоректировал /etc/rsyslog.conf
+root@ubuntusyslog:~# nano /etc/rsyslog.conf
+root@ubuntusyslog:~# cat /etc/rsyslog.conf
+# /etc/rsyslog.conf configuration file for rsyslog
+#
+# For more information install rsyslog-doc and see
+# /usr/share/doc/rsyslog-doc/html/configuration/index.html
+#
+# Default logging rules can be found in /etc/rsyslog.d/50-default.conf
+
+
+#################
+#### MODULES ####
+#################
+
+module(load="imuxsock") # provides support for local system logging
+#module(load="immark")  # provides --MARK-- message capability
+
+# provides UDP syslog reception
+module(load="imudp")
+input(type="imudp" port="514")
+
+# provides TCP syslog reception
+module(load="imtcp")
+input(type="imtcp" port="514")
+
+# provides kernel logging support and enable non-kernel klog messages
+module(load="imklog" permitnonkernelfacility="on")
+
+###########################
+#### GLOBAL DIRECTIVES ####
+###########################
+
+#
+# Use traditional timestamp format.
+# To enable high precision timestamps, comment out the following line.
+#
+$ActionFileDefaultTemplate RSYSLOG_TraditionalFileFormat
+
+# Filter duplicated messages
+$RepeatedMsgReduction on
+
+#
+# Set the default permissions for all log files.
+#
+$FileOwner syslog
+$FileGroup adm
+$FileCreateMode 0640
+$DirCreateMode 0755
+$Umask 0022
+$PrivDropToUser syslog
+$PrivDropToGroup syslog
+
+#
+# Where to place spool and state files
+#
+$WorkDirectory /var/spool/rsyslog
+
+#
+# Include all config files in /etc/rsyslog.d/
+#
+$IncludeConfig /etc/rsyslog.d/*.conf
+
+#Add remote logs
+$template RemoteLogs,"/var/log/rsyslog/%HOSTNAME%/%PROGRAMNAME%.log"
+*.* ?RemoteLogs
+& ~
+root@ubuntusyslog:~# 
+root@ubuntusyslog:~# systemctl restart rsyslog
+root@ubuntusyslog:~# ss -tuln
+Netid               State                Recv-Q                Send-Q                                  Local Address:Port                               Peer Address:Port               Process
+udp                 UNCONN               0                     0                                       127.0.0.53%lo:53                                      0.0.0.0:*
+udp                 UNCONN               0                     0                                    10.0.2.15%enp0s3:68                                      0.0.0.0:*
+udp                 UNCONN               0                     0                                             0.0.0.0:68                                      0.0.0.0:*
+udp                 UNCONN               0                     0                                             0.0.0.0:68                                      0.0.0.0:*
+udp                 UNCONN               0                     0                                             0.0.0.0:514                                     0.0.0.0:*
+udp                 UNCONN               0                     0                                                [::]:514                                        [::]:*
+tcp                 LISTEN               0                     128                                         127.0.0.1:6010                                    0.0.0.0:*
+tcp                 LISTEN               0                     25                                            0.0.0.0:514                                     0.0.0.0:*
+tcp                 LISTEN               0                     4096                                    127.0.0.53%lo:53                                      0.0.0.0:*
+tcp                 LISTEN               0                     128                                           0.0.0.0:22                                      0.0.0.0:*
+tcp                 LISTEN               0                     128                                             [::1]:6010                                       [::]:*
+tcp                 LISTEN               0                     25                                               [::]:514                                        [::]:*
+tcp                 LISTEN               0                     128                                              [::]:22                                         [::]:*
+root@ubuntusyslog:~#
+
+#Читаем логи с машины Ubuntu_Nginx на сервере Ubuntu_Syslog
+root@ubuntusyslog:~# cd /var/log
+root@ubuntusyslog:/var/log# ll
+total 1672
+drwxrwxr-x  10 root      syslog            4096 Jul 17 14:21 ./
+drwxr-xr-x  13 root      root              4096 Aug 24  2021 ../
+-rw-r--r--   1 root      root             32200 Jul 17 14:21 alternatives.log
+drwxr-xr-x   2 root      root              4096 Jul 17 14:20 apt/
+-rw-r-----   1 syslog    adm              12414 Jul 17 14:20 auth.log
+-rw-r--r--   1 root      root            104003 Aug 24  2021 bootstrap.log
+-rw-rw----   1 root      utmp                 0 Aug 24  2021 btmp
+-rw-r--r--   1 syslog    adm             249147 Jul 17 14:15 cloud-init.log
+-rw-r-----   1 root      adm              10999 Jul 17 14:15 cloud-init-output.log
+drwxr-xr-x   2 root      root              4096 Aug  4  2021 dist-upgrade/
+-rw-r--r--   1 root      adm              45267 Jul 17 14:15 dmesg
+-rw-r--r--   1 root      adm              45171 Jul 16 20:09 dmesg.0
+-rw-r--r--   1 root      adm              13836 Jul 16 13:14 dmesg.1.gz
+-rw-r--r--   1 root      root            542170 Jul 17 14:21 dpkg.log
+-rw-r--r--   1 root      root             32032 Jul 16 13:14 faillog
+drwxr-xr-x   3 root      root              4096 Jul 16 13:10 installer/
+drwxr-sr-x+  3 root      systemd-journal   4096 Jul 16 13:14 journal/
+-rw-r-----   1 syslog    adm             184143 Jul 17 14:46 kern.log
+drwxr-xr-x   2 landscape landscape         4096 Jul 16 13:16 landscape/
+-rw-rw-r--   1 root      utmp            292292 Jul 17 14:18 lastlog
+drwx------   2 root      root              4096 Aug 24  2021 private/
+drwxr-xr-x   4 syslog    syslog            4096 Jul 16 22:20 rsyslog/
+-rw-r-----   1 syslog    adm             365426 Jul 17 14:48 syslog
+-rw-------   1 root      root              1328 Jul 17 14:20 ubuntu-advantage.log
+-rw-r--r--   1 root      root               157 Jul 17 14:21 ubuntu-advantage-timer.log
+drwxr-x---   2 root      adm               4096 Jul 16 13:04 unattended-upgrades/
+-rw-rw-r--   1 root      utmp              8064 Jul 17 14:18 wtmp
+root@ubuntusyslog:/var/log# cd /var/log/rsyslog/
+root@ubuntusyslog:/var/log/rsyslog# ll
+total 16
+drwxr-xr-x  4 syslog syslog 4096 Jul 16 22:20 ./
+drwxrwxr-x 10 root   syslog 4096 Jul 17 14:21 ../
+drwxr-xr-x  2 syslog syslog 4096 Jul 16 22:20 ubuntunginx/
+drwxr-xr-x  2 syslog syslog 4096 Jul 17 14:21 ubuntusyslog/
+root@ubuntusyslog:/var/log/rsyslog# cat /ubuntunginx
+cat: /ubuntunginx: No such file or directory
+root@ubuntusyslog:/var/log/rsyslog# cd /ubuntunginx
+-bash: cd: /ubuntunginx: No such file or directory
+root@ubuntusyslog:/var/log/rsyslog# cat ubuntunginx
+cat: ubuntunginx: Is a directory
+root@ubuntusyslog:/var/log/rsyslog# cd ubuntunginx
+root@ubuntusyslog:/var/log/rsyslog/ubuntunginx# ll
+total 12
+drwxr-xr-x 2 syslog syslog 4096 Jul 16 22:20 ./
+drwxr-xr-x 4 syslog syslog 4096 Jul 16 22:20 ../
+-rw-r----- 1 syslog adm     494 Jul 16 22:20 nginx_access.log
+root@ubuntusyslog:/var/log/rsyslog/ubuntunginx# cat nginx_access.log
+Jul 16 22:20:21 ubuntunginx nginx_access: 192.168.56.1 - - [16/Jul/2022:22:20:21 +0300] "GET / HTTP/1.1" 200 396 "-" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
+Jul 16 22:20:21 ubuntunginx nginx_access: 192.168.56.1 - - [16/Jul/2022:22:20:21 +0300] "GET /favicon.ico HTTP/1.1" 404 197 "http://192.168.56.102/" "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/103.0.0.0 Safari/537.36"
+root@ubuntusyslog:/var/log/rsyslog/ubuntunginx#
+
