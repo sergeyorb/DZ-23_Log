@@ -16,7 +16,10 @@
 
 # 2.1 Названием Ubuntu_Syslog
   <ul>
-  <p> 
-  <p>
-  </ul>  
-</ul>
+  <li> Переходим в root и устанавливаем время по Москве</li>
+  <p> root@ubuntusyslog:~# date
+  <p> Sat 16 Jul 2022 05:44:45 PM UTC
+  <p> root@ubuntusyslog:~# cp /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+  <p> root@ubuntusyslog:~# date
+  <p> Sat 16 Jul 2022 08:45:13 PM MSK  
+  </ul>
