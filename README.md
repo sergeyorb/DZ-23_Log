@@ -22,4 +22,15 @@
   <p> root@ubuntusyslog:~# cp /usr/share/zoneinfo/Europe/Moscow /etc/localtime
   <p> root@ubuntusyslog:~# date
   <p> Sat 16 Jul 2022 08:45:13 PM MSK  
+  
+  <li> Перезапуск systemd-timesyncd.service и проверка работы</li>
+  <p> root@ubuntusyslog:~# systemctl restart systemd-timesyncd.service
+  <p> root@ubuntusyslog:~# systemctl status systemd-timesyncd.service
+      
+  <li> Откоректировал /etc/rsyslog.conf</li>
+   
+  <li> Рестарт syslog и проверил порты</li>
+  <p> root@ubuntusyslog:~# systemctl restart rsyslog
+  <p> root@ubuntusyslog:~# ss -tuln
+ 
   </ul>
