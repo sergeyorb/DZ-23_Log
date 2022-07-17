@@ -63,5 +63,5 @@
 # 5. Получаем логи с Web на rsyslog
 <ul>
 <li> Читаем логи с машины Ubuntu_Nginx на сервере Ubuntu_Syslog</li> 
-<p> Логи прикреплены в текстовом формате в выводе с терминала  
+<p> Логи прикреплены в текстовом формате в выводе с терминала  https://github.com/sergeyorb/DZ-23_Log/blob/main/Term_Ubuntu_Syslog.txt
 </ul>  
