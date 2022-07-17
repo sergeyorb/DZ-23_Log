@@ -2,7 +2,8 @@
 <ol> 
   <li>Создать сденд для выполнения домашнего задания
   <li> Настроить стенд для выполнения домашнего задания
-  <li> Настраиваем Ubuntu_Syslog  
+  <li> Настраиваем Ubuntu_Syslog
+  <li> Настраиваем Ubuntu_Nginx  
   <li> Собрать логи с Web на rsyslog
 </ol>  
 
@@ -14,7 +15,7 @@
 
 # 2. Настроить стенд для выполнения домашнего задания
 
-# 2.1 Настраиваем Ubuntu_Syslog
+# 3. Настраиваем Ubuntu_Syslog
   <ul>
   <li> Переходим в root и устанавливаем время по Москве</li>
   <p> root@ubuntusyslog:~# date
@@ -32,5 +33,18 @@
   <li> Рестарт syslog и проверил порты</li>
   <p> root@ubuntusyslog:~# systemctl restart rsyslog
   <p> root@ubuntusyslog:~# ss -tuln
- 
   </ul>
+
+# 4. Настраиваем Ubuntu_Nginx
+<ul>
+<li> Переходим в root и устанавливаем время по Москве</li>
+  <p> root@ubuntusyslog:~# date
+  <p> Sat 16 Jul 2022 05:44:45 PM UTC
+  <p> root@ubuntusyslog:~# cp /usr/share/zoneinfo/Europe/Moscow /etc/localtime
+  <p> root@ubuntusyslog:~# date
+  <p> Sat 16 Jul 2022 08:45:13 PM MSK  
+  
+<li></li>
+<li></li>
+<li></li>  
+</ul>  
