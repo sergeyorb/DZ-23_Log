@@ -11,4 +11,9 @@
   <p> Развернута VM на базе Ubuntu ubuntu-20.04.3-live-server-amd64 с названием Ubuntu_Nginx   
 </ul> 
 
-
+#2. Настроить стенд для выполнения домашнего задания
+#2.1 Названием Ubuntu_Syslog
+<ul>
+  <p> 
+  <p>  
+</ul>
